@@ -7,8 +7,8 @@ function main(){
 	var scene = new Scene(gl);
 	scene.createShaders('shader', "#shader-vs", "#shader-fs", ["aVertexPosition", "aVertexColor"], ["uPMatrix","uVMatrix","uMMatrix"]);
 	scene.createCamera('camera', 'perspective');
-	scene.createImage('cuboImagem1','untitled.obj','shader');
-	scene.createImage('cuboImagem2','untitled2.obj','shader');
+	scene.createImage('cuboImagem1','untitled.obj','shader', 6, [0,3]);
+	scene.createImage('cuboImagem2','untitled2.obj','shader', 6, [0,3]);
 	scene.createPiece('cubo', 'cuboImagem1');
 	scene.pieces.cubo.setSize([1,1,1]);
 	scene.pieces.cubo.setPosition([0,0,-10]);

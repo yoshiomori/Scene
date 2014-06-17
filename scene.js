@@ -9,7 +9,7 @@ function Scene(gl){
 };
 
 Scene.prototype.createShaders = function(name, vs, fs, namesOfAttributes, namesOfUniforms){
-	if(namesOfUniforms.length != 3) throw new Error("Deve haver 3 uniformes");
+//	if(namesOfUniforms.length != 3) throw new Error("Deve haver 3 uniformes");
 	var gl = this.gl;
 	var vertexShader = getShader(gl, vs);
 	var fragmentShader = getShader(gl, fs);
@@ -66,8 +66,10 @@ Scene.prototype.createShaders = function(name, vs, fs, namesOfAttributes, namesO
 	}
 };
 
-Scene.prototype.createImage = function(imageName,fileName,shaderName){
+Scene.prototype.createImage = function(imageName,fileName,shaderName, stride, offsets){
 	var scene = this;
+	console.log(stride);
+	console.log(offsets);
 
 	var client = new XMLHttpRequest();
 	client.open('GET', fileName, false);
@@ -125,11 +127,12 @@ Scene.prototype.createImage = function(imageName,fileName,shaderName){
 			});
 			var buffer = new Float32Array(bufferAux);
 			var index = new Uint8Array(indexAux);
-			var sizes = new Array;
-			sizes = [v[0].length];
-			if(vt.length) sizes.push(vt[0].length);
-			if(vn.length) sizes.push(vn[0].length);
-			var image =  new Buffer(buffer,index,sizes, scene.gl, shaderName);
+			var lengths = new Array;
+			lengths = [v[0].length];
+			if(vt.length) lengths.push(vt[0].length);
+			if(vn.length) lengths.push(vn[0].length);
+			var image =  new Buffer(buffer,index,lengths, scene.gl, shaderName, stride, offsets);
+//			var image =  new Buffer(buffer,index, scene.gl, shaderName);
 			if(currentMaterialName){
 				var client2 = new XMLHttpRequest();
 				client2.open('GET', currentMaterialName, false);
@@ -169,19 +172,21 @@ Scene.prototype.createImage = function(imageName,fileName,shaderName){
 	};
 	client.send();
 
-	function Buffer(buffer, index, sizes, gl, shaderName){
-		var stride = 0;
-		sizes.forEach(function(size){stride += size;});
-		stride *= 4;
+	function Buffer(buffer, index, lengths, gl, shaderName, stride, offsets){
+		var bytes = 4;
+//		var stride = 0;
+//		sizes.forEach(function(size){stride += size;});
+		stride *= bytes;
 		this.vertices = newBuffer(gl.ARRAY_BUFFER, buffer);
-		var offset = 0;
-		var offsets = sizes.map(function(item, index, array){
-			var mem = offset;
-			offset += item;
-			return mem * 4;
-		});
+//		var offset = 0;
+//		var offsets = sizes.map(function(item, index, array){
+//			var mem = offset;
+//			offset += item;
+//			return mem * 4;
+//		});
+		offsets = offsets.map(function(item){return item * bytes;});
 		this.indices = newBuffer(gl.ELEMENT_ARRAY_BUFFER, index);
-		this.length = index.length;
+		this.indexLength = index.length;
 		function newBuffer(type, data){
 			var buffer = gl.createBuffer();
 			gl.bindBuffer(type, buffer);
@@ -189,18 +194,24 @@ Scene.prototype.createImage = function(imageName,fileName,shaderName){
 			return buffer;
 		};
 		this.draw = function(pMatrix,vMatrix,mMatrix){
-			gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms.uPMatrix, false, pMatrix);
-			gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms.uVMatrix, false, vMatrix);
-			gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms.uMMatrix, false, mMatrix);
+			var i = 0;
+			for(uniform in gl.shaders[shaderName].uniforms){
+				gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms[uniform], false, arguments[i]);
+				gl.enableVertexAttribArray(gl.shaders[shaderName].uniforms[uniform]);
+				i++;
+			}
+//			gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms.uPMatrix, false, pMatrix);
+//			gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms.uVMatrix, false, vMatrix);
+//			gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms.uMMatrix, false, mMatrix);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertices);
 			var i = 0;
 			for(attribute in gl.shaders[shaderName].attributes){
-				gl.vertexAttribPointer(gl.shaders[shaderName].attributes[attribute], sizes[i], gl.FLOAT, false, stride, offsets[i]);
+				gl.vertexAttribPointer(gl.shaders[shaderName].attributes[attribute], lengths[i], gl.FLOAT, false, stride, offsets[i]);
 				gl.enableVertexAttribArray(gl.shaders[shaderName].attributes[attribute]);
 				i++;
 			}
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indices);
-			gl.drawElements(gl.TRIANGLES, this.length, gl.UNSIGNED_BYTE, 0);
+			gl.drawElements(gl.TRIANGLES, this.indexLength, gl.UNSIGNED_BYTE, 0);
 		};
 	}
 };
