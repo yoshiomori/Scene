@@ -4,10 +4,12 @@ function Scene(gl){
 	this.images = new Object();
 	this.pieces = new Object();
 	this.cameras = new Object();
+	this.requests = new Array();
 	this.ready = false;
 };
 
 Scene.prototype.createShaders = function(name, vs, fs, namesOfAttributes, namesOfUniforms){
+	if(namesOfUniforms.length != 3) throw new Error("Deve haver 3 uniformes");
 	var gl = this.gl;
 	var vertexShader = getShader(gl, vs);
 	var fragmentShader = getShader(gl, fs);
@@ -191,10 +193,29 @@ Scene.prototype.createImage = function(imageName,fileName,shaderName){
 			gl.bufferData(type, data, gl.STATIC_DRAW);
 			return buffer;
 		};
-		this.draw = function(PMatrix,VMatrix,MMatrix){
-			console.log(PMatrix);
-			console.log(VMatrix);
-			console.log(MMatrix);
+		this.draw = function(pMatrix,vMatrix,mMatrix){
+//			console.log(PMatrix);
+//			console.log(VMatrix);
+//			console.log(MMatrix);
+//			arguments.length
+//			console.log(arguments);
+//			arguments.forEach(function(item){
+//				gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms.uPMatrix, false, pMatrix);
+//			});
+//			console.log(gl);
+//			for(uniform in gl.shaders[shaderName].uniforms){
+////				console.log(uniform);
+////				console.log(gl.shaders[shaderName].uniforms[uniform]);
+//				console.log(arguments.shift());
+////				gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms[uniform], false, arguments.shift());
+//			}
+			gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms.uPMatrix, false, pMatrix);
+			gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms.uVMatrix, false, vMatrix);
+			gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms.uMMatrix, false, mMatrix);
+//			console.log(this);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertices);
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indices);
+			gl.drawElements(gl.TRIANGLES, this.length, gl.UNSIGNED_BYTE, 0);
 		};
 	}
 };
@@ -251,7 +272,7 @@ Scene.prototype.createPiece = function(name, imageName){
 		}
 		this.show = function(PMatrix,VMatrix){
 			if(!image) throw new Error("Nome da imagem não definida");
-//			image.draw(PMatrix,VMatrix,mMatrix);
+			image.draw(PMatrix,VMatrix,mMatrix);
 //			console.log(image);
 		};
 	};
@@ -388,12 +409,14 @@ Scene.prototype.createCamera = function(cameraName, Projection){
 
 Scene.prototype.isReady = function(){
 	if(!this.ready){
+		this.ready = true;
 		pieces = this.pieces;
 		for(piece in pieces){
+//			console.log(piece);
 //			console.log(this.ready);
 //			console.log(pieces[piece].isReady());
 //			console.log(pieces[piece].isReady() && this.ready);
-			this.ready = (pieces[piece].isReady() && !this.ready);
+			if(!pieces[piece].isReady())this.ready = false;
 		}
 	}
 	return this.ready;

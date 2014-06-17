@@ -9,8 +9,21 @@ function main(){
 	var scene = new Scene(gl);
 	scene.createShaders('shader', "#shader-vs", "#shader-fs", ["aVertexPosition", "aVertexColor"], ["uPMatrix","uVMatrix","uMMatrix"]);
 	scene.createCamera('camera', 'perspective');
-	scene.createImage('cubo','untitled.obj','shader');
-	scene.createPiece('cubo', 'cubo');
+	scene.createImage('cuboImagem1','untitled.obj','shader');
+	scene.createImage('cuboImagem2','untitled2.obj','shader');
+	scene.createPiece('cubo', 'cuboImagem1');
+	scene.pieces.cubo.setSize([1,1,1]);
+	scene.pieces.cubo.setPosition([0,0,-10]);
+	scene.pieces.cubo.rotate([1,0,1],Math.PI/4);
+//	scene.createPiece('cubo2', 'cuboImagem2');
+//	scene.pieces.cubo2.setSize([1,1,1]);
+//	scene.pieces.cubo2.setPosition([2,2,-10]);
+//	scene.pieces.cubo2.rotate([0,1,1],Math.PI/6);
+	
+	console.log(scene);
+	
+//	console.log(scene);
+	
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
 //	console.log(scene);
