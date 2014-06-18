@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Eventos Teclado</title>
+<link href="format.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
+    <script type="text/javascript" src="webgl-utils.js"></script>
+<script type="text/javascript" src="flip.js"></script>
+<script id="shader-vs" type="x-shader/x-vertex">
+      attribute vec3 aVertexPosition;
+      attribute vec4 aVertexColor;
+	  varying vec4 vVertexColor;
+      
+      uniform mat4 uMMatrix;
+      uniform mat4 uVMatrix;
+      uniform mat4 uPMatrix;
+      
+      void main(void)
+      {
+	       gl_Position = uPMatrix * uVMatrix * uMMatrix * vec4(aVertexPosition, 1.0);
+           vVertexColor = aVertexColor;
+      }
+    </script>
+<script id="shader-fs" type="x-shader/x-fragment">
+      precision mediump float;
+      varying vec4 vVertexColor;
+
+      void main(void)
+      {
+	      gl_FragColor = vVertexColor;
+      }
+    </script>
+</head>
+<body onload="main()">
+	<canvas id="window" width="500px" height="500px" style="border:none">
+	Your browser does not support HTML5
+	</canvas>
+	<div>
+		<label><font size=2><br>ENTER para começar</font></label> 
+		<label><font size=2><br>Z para movimentar o triângulo esquerdo</font></label> 
+		<label><font size=2><br>X para movimentar o triângulo direito</font></label>
+		<label><font size=2><br>P para pausar</font></label>
+		<label><font size=2><br>U para continua(sair do pause)r</font></label>
+		<label><font size=2><br>R para reiniciar</font></label>  
+	</div>
+</body>
+</html>

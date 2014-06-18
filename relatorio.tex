@@ -1,0 +1,139 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[brazil]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{ae} % Arruma a fonte quando usa o pacote acima
+
+\usepackage{amssymb} % Alguns caracteres matemáticos especiais
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+\usepackage[pdftex]{graphicx}%Para inserir figuras
+
+
+
+\title{Pinball}
+
+\author{Ronaldo Yang \& Yoshio Mori
+  \\
+  \small 6432393 \& 6432393
+}
+\date{Junho de 2014} % Data
+
+
+\begin{document}
+\pagestyle{myheadings}
+\maketitle
+\newpage
+\tableofcontents
+\pagebreak
+
+\section{Estrutura}
+\subsection{Função Principal (main - pinball.js)}
+É a primeira função a ser chamada pelo cliente. Ela carrega o canvas, a interface do webgl, o scene e é reponsável por fazer a integração entre esses sistemas.
+
+A rotina dela consiste em carregar os buffers, inicializar o shader, criar os objetos. Após isso ele entra em loop de atualização dos objetos e renderização.
+
+\subsection{Classe principal (Scene - scene.js)}
+Essa classe contém as informações das imagens, de como desenhá-las na tela e das posições, tamanhos e orientações de cada peça.
+
+\subsubsection{Atributos da Classe}
+\begin{description}
+\item[gl] Interface gráfica.
+  \subitem[shaders] Conjunto de Object shader.
+\item[images] Conjunto de Object image.
+\item[pieces] Conjunto de Object piece.
+\item[camera] Conjunto de Object camera.
+\item[ready] Boolean informa true se todos os Object image foram carregados.
+\end{description}
+\subsubsection{Principais Métodos da Classe}
+\begin{description}
+\item[createShaders] Inicia um novo Object shader obtendo a posição, normal e textura de cada variável no shader.
+\item[createImage] Faz a leitura do arquivo Obj, coletando os vértices para serem armazenados num buffer da gpu. Com isso ele instancia um Object image.
+\item[isReady] Para cada Object image instanciado, verifica se a imagem já está pronta. Dessa forma é possível determinar quando começar as iterações do jogo.
+\end{description}
+\subsection{Object image}
+Esse objeto contém os endereços dos buffers de posições, normais, textura e indices de cada um dos vértices, assim como o shader reponsável pela renderização.
+
+E seu único método, draw, é chamado pelo Object piece com os parâmetros das matrizes de projeção vértice e modelo. Com esses parâmetros inicia-se o processo de renderização.
+
+\subsection{Object piece}
+Cada Object piece está associado à um Object image. Ela contém as informações de posição, tamanho e orientação.
+
+No processo de construção as informações de posição, tamanho e orientação são usados para gerar a matriz de modelo, e sempre que esse atributos são atualizados a rotinha se repete.
+
+\subsubsection{Principais Métodos}
+\begin{description}
+\item[isReady] Verifica se a imagem foi inicializada.
+\item[show] É chamada pela câmera com os parâmetros das matrizes de projeção e visualização. O método envia esses parâmetros para o Object image associado, assim como sua matriz de modelo.
+\end{description}
+\subsection{Object camera}
+Seus atributos são posição, ponto da direção que a câmera está voltado e vetor que indica o cima da camera.
+
+Assim como no object piece, aos ser instanciado as matrizes de projeção e visualização são calculadas e sempre que seus atributos são atualizados novas matrizes são geradas.
+
+Seu método show é chamado pelo scene, que por sua vez mostra a imagem de cada peça.
+
+
+\section{Objetos}
+\mbox{}
+
+Os objetos que estariam na cena estão na pasta pinballOBJ. Todos foram feitos usando o software Blender 2.7.
+
+\section{Eventos do Teclado}
+\mbox{}
+
+Os eventos descritos aqui estão no projeto flippers-keyboard.
+
+Para a verificação dos eventos do teclado, assim como a movimentação das palhetas, foi feito um pequeno simulador. Esse, consiste em dois triângulos simulando o que seriam as palhetas e se 
+movimentando(rotacionando no eixo z até um certo ângulo e depois voltando a posição original) quando as teclas certas são pressionadas. Para ser mais semelhante as palhetas, os triângulos
+deveriam ter sido iniciados transladados um pouco para o eixo x positivo, para que o eixo de rotação fosse mais parecidos com os das palhetas. Como era apenas um teste, não foi dada 
+preocupação a isso.
+
+Foi implementado também nesse simulador o botão de start, pause, unpause e restart. A lista de teclas e suas funções são:
+
+\begin{itemize}
+\item ENTER para start
+\item Z para movimentação do triângulo esquerdo
+\item X para movimentação do triângulo direito
+\item P para pause
+\item U para unpause
+\item R para reiniciar
+\end{itemize}
+
+Ao iniciar esse simulador, só haverá algum movimento(início) quando se dá start. Ao apertar ENTER, podemos começar a movimentar as palhetas com Z e X. Caso apertamos P em algum momento, 
+a cena congela e só continua a sua movimentação assim que apertar U. Para restart, aperta-se R e as palhetas voltam a posição inicial. Para iniciar a movimentação novamente basta apertar 
+ENTER.
+
+Outros eventos que foram descritos, mas não implemetados são:
+
+\begin{itemize}
+\item SPACE para a força da mola
+\item PAGE UP para o aumento da inclinação da mesa
+\item PAGE DOWN para a diminuição da inclinação da mesa
+\end{itemize}
+
+Para o caso da mola, iríamos achatar a mola conforme o pressionamento da tecla SPACE. Quanto maior pressionamento, maior seria a força na direção da bola. 
+
+\section{Colisões}
+\mbox{}
+
+Para a detecção de colisões iríamos fazer o seguinte:
+
+\subsection{Bola-Bola}
+\mbox{}
+
+Basta verificar se a distância entre os centros é menor ou igual a soma dos raios.
+
+\subsection{Bola-Poliedro}
+\mbox{}
+
+\begin{itemize}
+\item Encontramos os limitantes do poliedro nos eixos x, y e z. Assim criamos uma espécie de bounding box, um cubo que envolve/encapsula todo o poliedro
+\item Verificamos se existe uma potencial intersecção entre esse cubo e a esfera(bola). Assim evitamos mais cálculos caso não exista colisão, pois é mais
+  fácil verificar a intersecção entre uma esfera e um cubo
+\item Caso não exista intersecção, não há colisão. Fim
+\item Se sim, pode existir uma possível colisão
+  
+\end{itemize}
+
+\end{document}

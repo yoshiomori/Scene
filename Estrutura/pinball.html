@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<link rel="stylesheet" type="text/css" href="pinball.css">
+<meta charset="utf-8" />
+<title>Desenhando um retângulo azul</title>
+<script id="shader-vs" type="x-shader/x-vertex">
+attribute vec4 aVertexPosition;
+attribute vec4 aVertexColor;
+varying vec4 vVertexColor;
+uniform mat4 uMMatrix;
+uniform mat4 uVMatrix;
+uniform mat4 uPMatrix;
+void main(void){
+	gl_Position = uPMatrix * uVMatrix * uMMatrix * aVertexPosition;
+	vVertexColor = aVertexColor;
+}
+</script>
+<script id="shader-fs" type="x-shader/x-fragment">
+precision mediump float;
+varying vec4 vVertexColor;
+void main(void){
+	gl_FragColor = vVertexColor;
+}
+</script>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="pinball.js"></script>
+<script type="text/javascript" src="scene.js"></script>
+</head>
+<body onload="main()">
+	<canvas id="window">
+Por favor use um browser com suporte para "canvas"
+</canvas>
+</body>
+</html>
