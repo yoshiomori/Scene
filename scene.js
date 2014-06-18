@@ -270,9 +270,9 @@ Scene.prototype.createCamera = function(cameraName, Projection){
 	this.cameras[cameraName] = new Camera(this);
 	function Camera(scene){
 		var projection = new String;
-		var position = new Float32Array(3);
-		var lookAt = new Float32Array(3);
-		var up = new Float32Array(3);
+		var position = new Float32Array([0,0,0]);
+		var lookAt = new Float32Array([0,0,-1]);
+		var up = new Float32Array([0,1,0]);
 		var VMatrix = mat4.create();
 		var PMatrix = mat4.create();
 		update();
