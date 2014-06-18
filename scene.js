@@ -25,9 +25,9 @@ Scene.prototype.createShaders = function(name, vs, fs, namesOfAttributes, namesO
 	namesOfAttributes.forEach(function(name){
 		attributes[name] = gl.getAttribLocation(program, name);
 	});
-	var uniforms = new Object;
+	var uniforms = new Array;
 	namesOfUniforms.forEach(function(name){
-		uniforms[name] = gl.getUniformLocation(program, name);
+		uniforms.push(gl.getUniformLocation(program, name));
 	});
 	program.attributes = attributes;
 	program.uniforms = uniforms;
