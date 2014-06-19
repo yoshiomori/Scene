@@ -20,7 +20,6 @@ Scene.prototype.createShaders = function(name, vs, fs, namesOfAttributes, namesO
 	if(!gl.getProgramParameter(program, gl.LINK_STATUS)){
 		alert("Não pode inicializar shaders");
 	}
-	gl.useProgram(program);
 	var attributes = new Object;
 	namesOfAttributes.forEach(function(name){
 		attributes[name] = gl.getAttribLocation(program, name);
@@ -68,8 +67,6 @@ Scene.prototype.createShaders = function(name, vs, fs, namesOfAttributes, namesO
 
 Scene.prototype.createImage = function(imageName,fileName,shaderName, stride, offsets){
 	var scene = this;
-	console.log(stride);
-	console.log(offsets);
 
 	var client = new XMLHttpRequest();
 	client.open('GET', fileName, false);
@@ -195,6 +192,7 @@ Scene.prototype.createImage = function(imageName,fileName,shaderName, stride, of
 		};
 		this.draw = function(pMatrix,vMatrix,mMatrix){
 			var i = 0;
+			gl.useProgram(gl.shaders[shaderName]);
 			for(uniform in gl.shaders[shaderName].uniforms){
 				gl.uniformMatrix4fv(gl.shaders[shaderName].uniforms[uniform], false, arguments[i]);
 				gl.enableVertexAttribArray(gl.shaders[shaderName].uniforms[uniform]);
